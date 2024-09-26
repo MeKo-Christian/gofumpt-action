@@ -17,38 +17,23 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Install Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ^1.22.2
-        cache-dependency-path: "*/*.sum"
-
-    - name: Set up Go workspace
-      run: |
-        mkdir -p $GITHUB_WORKSPACE/go/bin
-        echo "$GITHUB_WORKSPACE/go/bin" >> $GITHUB_PATH
-      shell: bash
-
-    - name: Ensure cache directories exist
-      run: |
-        mkdir -p $HOME/go/pkg/mod
-        mkdir -p $HOME/.cache/go-build
-      shell: bash
-
-    - name: Restore Go cache
+    - name: Restore Go modules cache
       id: cache
       uses: actions/cache@v4
-      if: "hashFiles('**/go.sum') != ''"
       with:
-        path: |
-          $HOME/go/pkg/mod_${{ github.run_id }}
-          $HOME/.cache/go-build_${{ github.run_id }}
+        path: ${{ runner.tool_cache }}/go/pkg/mod
         key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-mod-
 
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ^1.22.2
+        cache-dependency-path: "**/go.sum"
+
     - name: Set GOBIN environment variable
-      run: echo "GOBIN=$GITHUB_WORKSPACE/go/bin" >> $GITHUB_ENV
+      run: echo "GOBIN=${{ runner.tool_cache }}/go/bin" >> $GITHUB_ENV
       shell: bash
 
     - name: Install gofumpt
@@ -60,11 +45,9 @@ runs:
         fi
       shell: bash
 
-    - name: Save Go cache
-      if: steps.cache.outputs.cache-hit != 'true' && always()
+    - name: Save Go modules cache
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
-        path: |
-          $HOME/go/pkg/mod_${{ github.run_id }}
-          $HOME/.cache/go-build_${{ github.run_id }}
+        path: ${{ runner.tool_cache }}/go/pkg/mod
         key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
