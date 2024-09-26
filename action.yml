@@ -21,7 +21,7 @@ runs:
       id: cache
       uses: actions/cache@v4
       with:
-        path: ${{ runner.tool_cache }}/go/pkg/mod
+        path: ${{ env.GOPATH }}/pkg/mod
         key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-mod-
@@ -32,8 +32,14 @@ runs:
         go-version: ^1.22.2
         cache-dependency-path: "**/go.sum"
 
-    - name: Set GOBIN environment variable
-      run: echo "GOBIN=${{ runner.tool_cache }}/go/bin" >> $GITHUB_ENV
+    - name: Set GOBIN and GOPATH environment variables
+      run: |
+        echo "GOBIN=$(go env GOPATH)/bin" >> $GITHUB_ENV
+        echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Add GOBIN to PATH
+      run: echo "$(go env GOBIN)" >> $GITHUB_PATH
       shell: bash
 
     - name: Install gofumpt
@@ -49,5 +55,5 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
-        path: ${{ runner.tool_cache }}/go/pkg/mod
+        path: ${{ env.GOPATH }}/pkg/mod
         key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
