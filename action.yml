@@ -23,6 +23,10 @@ runs:
         echo "$GITHUB_WORKSPACE/go/bin" >> $GITHUB_PATH
       shell: bash
 
+    - name: Set GOBIN environment variable
+      run: echo "GOBIN=$GITHUB_WORKSPACE/go/bin" >> $GITHUB_ENV
+      shell: bash
+
     - name: Install gofumpt
       run: |
         if [ "${{ inputs.gofumpt_version }}" == "latest" ]; then
@@ -30,5 +34,4 @@ runs:
         else
           go install mvdan.cc/gofumpt@${{ inputs.gofumpt_version }}
         fi
-        mv $GOPATH/bin/gofumpt $GITHUB_WORKSPACE/go/bin/gofumpt
       shell: bash
