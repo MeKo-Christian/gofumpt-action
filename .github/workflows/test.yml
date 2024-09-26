@@ -1,0 +1,21 @@
+name: Test gofumpt
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  setup-and-run-gofumpt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install gofumpt
+        uses: ./.github/actions/gofumpt-setup
+        with:
+          gofumpt_version: 'latest'
+
+      - name: Run gofumpt
+        run: gofumpt -w .

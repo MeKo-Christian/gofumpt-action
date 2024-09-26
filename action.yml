@@ -1,0 +1,33 @@
+name: 'Install gofumpt'
+description: 'Installs gofumpt for use in GitHub Actions'
+
+author: 'Christian Budde <Christian.Budde@meko.de>'
+
+inputs:
+  gofumpt_version:
+    description: 'Version of gofumpt to install'
+    required: false
+    default: 'latest'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ^1.22.2
+        cache-dependency-path: "*/*.sum"
+
+    - name: Set up Go workspace
+      run: |
+        mkdir -p $GITHUB_WORKSPACE/go/bin
+        echo "$GITHUB_WORKSPACE/go/bin" >> $GITHUB_PATH
+
+    - name: Install gofumpt
+      run: |
+        if [ "${{ inputs.gofumpt_version }}" == "latest" ]; then
+          go install mvdan.cc/gofumpt@latest
+        else
+          go install mvdan.cc/gofumpt@${{ inputs.gofumpt_version }}
+        fi
+        mv $GOPATH/bin/gofumpt $GITHUB_WORKSPACE/go/bin/gofumpt
+      shell: bash
