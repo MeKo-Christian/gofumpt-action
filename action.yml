@@ -8,6 +8,12 @@ inputs:
     description: 'Version of gofumpt to install'
     required: false
     default: 'latest'
+
+outputs:
+  cache-hit:
+    description: 'Whether the cache was hit'
+    value: ${{ steps.cache.outputs.cache-hit }}
+
 runs:
   using: 'composite'
   steps:
@@ -23,6 +29,17 @@ runs:
         echo "$GITHUB_WORKSPACE/go/bin" >> $GITHUB_PATH
       shell: bash
 
+    - name: Restore Go cache
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Set GOBIN environment variable
       run: echo "GOBIN=$GITHUB_WORKSPACE/go/bin" >> $GITHUB_ENV
       shell: bash
@@ -35,3 +52,12 @@ runs:
           go install mvdan.cc/gofumpt@${{ inputs.gofumpt_version }}
         fi
       shell: bash
+
+    - name: Save Go cache
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
