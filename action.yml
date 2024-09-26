@@ -43,9 +43,9 @@ runs:
         path: |
           $HOME/go/pkg/mod
           $HOME/.cache/go-build
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-
+          ${{ runner.os }}-go-mod-
 
     - name: Set GOBIN environment variable
       run: echo "GOBIN=$GITHUB_WORKSPACE/go/bin" >> $GITHUB_ENV
