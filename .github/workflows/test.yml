@@ -1,9 +1,6 @@
 name: Test gofumpt
 
-on:
-  push:
-    branches:
-      - "*"
+on: [push]
 
 jobs:
   setup-and-run-gofumpt:
@@ -13,7 +10,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Install gofumpt
-        uses: ./.github/actions/gofumpt-setup
+        uses: ./
         with:
           gofumpt_version: 'latest'
 
