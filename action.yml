@@ -29,13 +29,20 @@ runs:
         echo "$GITHUB_WORKSPACE/go/bin" >> $GITHUB_PATH
       shell: bash
 
+    - name: Ensure cache directories exist
+      run: |
+        mkdir -p $HOME/go/pkg/mod
+        mkdir -p $HOME/.cache/go-build
+      shell: bash
+
     - name: Restore Go cache
       id: cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
+      if: "hashFiles('**/go.sum') != ''"
       with:
         path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
+          $HOME/go/pkg/mod
+          $HOME/.cache/go-build
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
@@ -55,7 +62,7 @@ runs:
 
     - name: Save Go cache
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/go/pkg/mod
