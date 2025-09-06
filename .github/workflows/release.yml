@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags
+
+      - name: Get latest tag
+        id: latest_tag
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
+      - name: Increment version
+        id: new_version
+        run: |
+          latest=${{ steps.latest_tag.outputs.tag }}
+          version=${latest#v}
+          IFS='.' read -r major minor patch <<< "$version"
+          new_patch=$((patch + 1))
+          new_version="v$major.$minor.$new_patch"
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.new_version.outputs.version }}
+          git push origin ${{ steps.new_version.outputs.version }}
+
+      - name: Create release
+        run: gh release create ${{ steps.new_version.outputs.version }} --generate-notes --draft
