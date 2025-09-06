@@ -1,22 +1,27 @@
-name: 'Install gofumpt'
-description: 'Installs gofumpt for use in GitHub Actions'
+name: "Install gofumpt"
+description: "Installs gofumpt for use in GitHub Actions"
 
-author: 'Christian Budde <Christian.Budde@meko.de>'
+author: "Christian Budde <Christian.Budde@meko.de>"
 
 inputs:
   gofumpt_version:
-    description: 'Version of gofumpt to install'
+    description: "Version of gofumpt to install"
     required: false
-    default: 'latest'
+    default: "latest"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
+    - name: Check if Go is installed
+      id: check_go
+      run: echo "go_installed=$(command -v go >/dev/null 2>&1 && echo true || echo false)" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Install Go
-      uses: actions/setup-go@v5
+      if: steps.check_go.outputs.go_installed != 'true'
+      uses: actions/setup-go@v6
       with:
         go-version: ^1.22.2
-        cache-dependency-path: "**/go.sum"
 
     - name: Set GOBIN and GOPATH environment variables
       run: |
